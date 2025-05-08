@@ -156,6 +156,83 @@ void download_file() {
 }
 ```
 
+d. Program image_client.c harus disajikan dalam bentuk menu kreatif
+```c
+void show_menu() {
+    printf("==============================\n");
+    printf("     | Image Decoder Client |\n");
+    printf("==============================\n");
+    printf("1. Send input file to server\n");
+    printf("2. Download file from server\n");
+    printf("3. Exit\n");
+    printf("> ");
+}
+
+int main() {
+
+    while (1) {
+        show_menu();
+
+        int choice;
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                send_input_file();  // Fungsi kirim file untuk didekripsi
+                break;
+            case 2:
+                download_file();    // Fungsi minta file JPEG dari server
+                break;
+            case 3: {
+                // Kirim perintah EXIT ke server
+                int sockfd = connect_to_server();
+                if (sockfd > 0) {
+                    send(sockfd, "EXIT", 4, 0);
+                    close(sockfd);
+                }
+                printf("Exiting...\n");
+                return 0;
+            }
+            default:
+                printf("Invalid choice!\n");
+        }
+    }
+}
+```
+e. Program dianggap berhasil bila pengguna dapat mengirimkan text file dan menerima sebuah file jpeg yang dapat dilihat isinya.   
+
+f. Program image_server.c diharuskan untuk tidak keluar/terminate saat terjadi error dan client akan menerima error message sebagai response
+```c
+while (1) {
+    int client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &addr_len);
+    if (client_fd < 0) {
+        write_log("Server", "ACCEPT_ERROR", "Failed to accept connection");
+        continue;  
+
+    }
+
+    handle_client(client_fd);
+}
+```
+
+g. Server menyimpan log semua percakapan antara image_server.c dan image_client.c di dalam file server.log.
+```c
+void write_log(const char *source, const char *action, const char *info) {
+    FILE *log = fopen("server/server.log", "a");
+    if (!log) return;
+
+    // Ambil waktu saat ini
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    char timestr[64];
+    strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", t);
+
+    // Tulis log ke file
+    fprintf(log, "[%s][%s]: [%s] [%s]\n", source, timestr, action, info);
+    fclose(log);
+}
+```
+
 ## Dokumentasi
 ![Image](https://github.com/user-attachments/assets/a826b17c-d199-44a0-a1c9-ec188fbfbc81)
 
