@@ -254,6 +254,39 @@ Setiap agen pengiriman (A, B, dan C) berjalan sebagai thread terpisah dan akan s
 Fungsi terkait:
 `agent_thread() – Dibuat di file delivery_agent.c`
 
+```bash
+void *agent_thread(void *arg) {
+    char *agent_name = (char *)arg;
+
+    while (1) {
+        for (int i = 0; i < *order_count; i++) {
+            if (strcmp(orders[i].type, "Express") == 0 && strcmp(orders[i].status, "Pending") == 0) {
+                snprintf(orders[i].status, STATUS_LEN, "Delivered by Agent %s", agent_name);
+
+                FILE *logfile = fopen("delivery.log", "a");
+                if (logfile) {
+                    time_t now = time(NULL);
+                    struct tm *t = localtime(&now);
+                    fprintf(logfile,
+                            "[%02d/%02d/%04d %02d:%02d:%02d] [AGENT %s] Express package delivered to %s in %s\n",
+                            t->tm_mday, t->tm_mon + 1, t->tm_year + 1900,
+                            t->tm_hour, t->tm_min, t->tm_sec,
+                            agent_name, orders[i].name, orders[i].address);
+                    fclose(logfile);
+                }
+
+                printf("[%s] Delivered Express package to %s\n", agent_name, orders[i].name);
+                sleep(1); // Simulasi delay pengiriman
+            }
+        }
+        sleep(1); // Cek setiap 1 detik
+    }
+
+    return NULL;
+}
+```
+
+
 ### c. Pengiriman Bertipe Reguler
 Jika user menjalankan `./dispatcher -deliver [Nama]`, maka program mencari order reguler sesuai nama. Jika ditemukan dan statusnya masih "Pending", maka status diubah menjadi `"Delivered by Agent clarissazea"` dan log ditulis ke file `delivery.log.` Jika order tipe Express, maka user tidak diizinkan mengantar.
 
