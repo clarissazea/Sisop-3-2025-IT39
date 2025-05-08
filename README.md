@@ -17,7 +17,8 @@ a. Mendownload file rahasia dari link
 wget -O secrets.zip "https://drive.google.com/uc?export=download&id=15mnXpYUimVP1F5Df7qd_Ahbjor3o1cVw" && unzip secrets.zip -d client/ && rm -r secrets.zip
 ```
 b. Pada image_server.c, program yang dibuat harus berjalan secara daemon di background dan terhubung dengan image_client.c melalui socket RPC.
-```c (daemonize)
+### Daemonize
+```c 
 void daemonize() {
     pid_t pid = fork();
     if (pid < 0) exit(EXIT_FAILURE);
@@ -30,7 +31,8 @@ void daemonize() {
     close(STDERR_FILENO);
 }
 ```
-```c (socket setup RPC)
+### Socket setup RPC
+```c
 int sockfd, new_sock;
     struct sockaddr_in servaddr, cliaddr;
     socklen_t addr_size;
@@ -54,6 +56,104 @@ int sockfd, new_sock;
     }
 
     close(sockfd);
+```
+
+c. Program image_client.c harus bisa terhubung dengan image_server.c dan bisa mengirimkan perintah untuk:   
+-Decrypt file      
+```c
+void send_input_file() {
+    // Ambil nama file dari user
+    char filename[256];
+    printf("Enter the file name (e.g. input_1.txt): ");
+    scanf("%s", filename);
+
+    // Gabungkan path file input
+    char filepath[512];
+    snprintf(filepath, sizeof(filepath), "client/secrets/%s", filename);
+
+    // Baca isi file
+    FILE *f = fopen(filepath, "r");
+    if (!f) {
+        printf("Error: File not found!\n");
+        return;
+    }
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    rewind(f);
+
+    char *buffer = malloc(fsize + 1);
+    fread(buffer, 1, fsize, f);
+    buffer[fsize] = '\0';
+    fclose(f);
+
+    // Buat koneksi ke server
+    int sockfd = connect_to_server();
+    if (sockfd < 0) {
+        free(buffer);
+        return;
+    }
+
+    // Kirim perintah DECRYPT dan isi text
+    char sendbuf[BUFSIZE];
+    snprintf(sendbuf, sizeof(sendbuf), "DECRYPT %s", buffer);
+    send(sockfd, sendbuf, strlen(sendbuf), 0);
+
+    // Terima respon dari server
+    char recvbuf[BUFSIZE] = {0};
+    int len = recv(sockfd, recvbuf, BUFSIZE, 0);
+    if (len > 0) {
+        recvbuf[len] = '\0';
+        printf("%s", recvbuf);  // Server: Text decrypted and saved as 17444xxxxx.jpeg
+    }
+
+    close(sockfd);
+    free(buffer);
+}
+```
+-Request download   
+```c
+void download_file() {
+    // Ambil nama file dari user
+    char filename[256];
+    printf("Enter the filename to download (e.g. 1744401282.jpeg): ");
+    scanf("%s", filename);
+
+    int sockfd = connect_to_server();
+    if (sockfd < 0) return;
+
+    // Kirim perintah DOWNLOAD <filename>
+    char request[BUFSIZE];
+    snprintf(request, sizeof(request), "DOWNLOAD %s", filename);
+    send(sockfd, request, strlen(request), 0);
+
+    // Simpan file JPEG hasil unduhan
+    char savepath[512];
+    snprintf(savepath, sizeof(savepath), "client/%s", filename);
+    FILE *f = fopen(savepath, "wb");
+    if (!f) {
+        printf("Error: Failed to create output file.\n");
+        close(sockfd);
+        return;
+    }
+
+    // Terima isi file dari server
+    char buffer[BUFSIZE];
+    int bytes, total = 0;
+    while ((bytes = recv(sockfd, buffer, BUFSIZE, 0)) > 0) {
+        fwrite(buffer, 1, bytes, f);
+        total += bytes;
+        if (bytes < BUFSIZE) break;
+    }
+    fclose(f);
+    close(sockfd);
+
+    if (total == 0) {
+        printf("Error: Server says file not found.\n");
+        remove(savepath);
+    } else {
+        printf("Success! Image saved as %s\n", filename);
+    }
+}
 ```
 
 ## Dokumentasi
