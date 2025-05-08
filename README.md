@@ -175,6 +175,29 @@ Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)
 
 ## Cara Pengerjaan
 
+Sistem RushGo ini terdiri dari dua program, yaitu:
+1. `delivery_agent.c`: Untuk agen pengantar otomatis pesanan Express.
+2. `dispatcher.c`: Untuk mengelola, memantau, dan memproses pesanan reguler (pesanan diantar manual)
+
+File CSV berisi pesanan `delivery_order.csv` dibaca oleh `dispatcher.c`. Kemudian data pesanan dimasukkan ke shared memory agar bisa diakses lintas program. `delivery_agent.c` membaca shared memory dan membuat tiga thread agen (A, B, C) untuk menemukan order Express berstatus Pending dan Mengantarnya otomatis (mengubah status dan mencatat ke log).
+
+User menjalankan dispatcher untuk:
+- Menampilkan seluruh pesanan (-list)
+- Melihat status pesanan tertentu (-status)
+- Mengirim Reguler order secara manual (-deliver [Nama])
+
+### Argumen menjalankan program:
+Untuk delivery agent
+`./delivery_agent`
+
+Untuk dispatcher
+`./dispatcher -list
+./dispatcher -status [Nama]
+./dispatcher -deliver [Nama]`
+
+
+
+
 ### a. Mengunduh File Order dan Menyimpannya ke Shared Memory
 Fungsi ini bertanggung jawab membaca file CSV delivery_order.csv, yang berisi daftar pesanan. Setiap baris mencakup informasi nama pelanggan, alamat, dan tipe pesanan. Data tersebut kemudian dimasukkan ke shared memory, dan setiap status pesanan di-set ke “Pending” secara default.
 
