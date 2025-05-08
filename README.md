@@ -188,7 +188,9 @@ User menjalankan dispatcher untuk:
 
 ### Argumen menjalankan program:
 Untuk delivery agent
-`./delivery_agent`
+```bash
+./delivery_agent
+```
 
 Untuk dispatcher
 ```bash
