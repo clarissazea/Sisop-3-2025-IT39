@@ -812,9 +812,94 @@ void ban_hunter(Hunter *hunters) {
 }
 ```
 
-### j. 
+### j. Fitur Reset Stat Hunter (system.c)
+Admin (Sung Jin-Woo) dapat memberikan kesempatan kedua kepada hunter tertentu dengan mereset seluruh statistik mereka ke nilai awal seperti saat pertama kali registrasi.
+```bash
+void reset_hunter_stats(Hunter *hunters) {
+    char target[50];
+    printf("Enter name of hunter to reset: ");
+    scanf("%s", target);
 
-### k. 
+    for (int i = 0; i < MAX_HUNTER; i++) {
+        if (hunters[i].used && strcmp(hunters[i].name, target) == 0) {
+            hunters[i].level = 1;
+            hunters[i].exp = 0;
+            hunters[i].atk = 10;
+            hunters[i].hp = 100;
+            hunters[i].def = 5;
+            hunters[i].banned = 0;
+            printf("Hunter %s's stats have been reset to default.\n", target);
+            return;
+        }
+    }
+    printf("Hunter not found.\n");
+}
+```
+
+
+### k. Fitur Notifikasi Dungeon Setiap 3 Detik
+```bash
+void* notification_thread(void* arg) {
+    while (notification_active) {
+        system("clear");
+        printf("=== HUNTER SYSTEM ===\n");
+
+        int available_count = 0;
+        int available_indices[MAX_DUNGEONS];
+
+        for (int j = 0; j < MAX_DUNGEONS; ++j) {
+            if (dungeons[j].used && dungeons[j].min_level <= hunters[current_hunter_index].level) {
+                available_indices[available_count++] = j;
+            }
+        }
+
+        if (available_count > 0) {
+            int random_idx = available_indices[rand() % available_count];
+            printf("\nNew Dungeon Available:\n");
+            printf("- %s (Level %d+)\n", dungeons[random_idx].name, dungeons[random_idx].min_level);
+        } else {
+            printf("\nNo new dungeons available\n");
+        }
+
+        // Menu (non-fungsional di thread ini)
+        printf("\n1. Dungeon List\n");
+        printf("2. Dungeon Raid\n");
+        printf("3. Hunters Battle\n");
+        printf("4. Toggle Notifications\n");
+        printf("5. Exit\n");
+        printf("\nChoice: ");
+        fflush(stdout);
+
+        sleep(3);
+    }
+    return NULL;
+}
+```
+```bash
+void toggle_notifications(int hunter_index) {
+    if (notification_active) {
+        notification_active = 0;
+        printf("Notifications turned OFF\n");
+    } else {
+        notification_active = 1;
+        current_hunter_index = hunter_index;
+        printf("Notifications turned ON\n");
+        
+        pthread_t thread;
+        pthread_create(&thread, NULL, notification_thread, NULL);
+        pthread_detach(thread);
+    }
+    press_enter();
+}
+
+```
+Penjelasan:
+1. `pthread_create()` dan `pthread_detach()` untuk membuat thread baru tanpa blocking.
+2. `sleep(3)` untuk delay pergantian dungeon.
+3. `rand()` dan `time(NULL)` untuk pemilihan dungeon secara acak dan dinamis.
+
+
+
 
 ### l. Hapus data shared memory
 ```bash
