@@ -221,6 +221,86 @@ Dokumentasi saat membaca `delivery_order.csv`
 Dokumentasi semua status awal pesanan yang di-set sebagai pending.
 ![image](https://github.com/user-attachments/assets/2e90f628-d257-4da6-81c0-915185a9c85b)
 
+### b. Pengiriman Bertipe Express
+Setiap agen pengiriman (A, B, dan C) berjalan sebagai thread terpisah dan akan secara otomatis mencari pesanan dengan tipe “Express” dan status “Pending”, lalu mengubah statusnya menjadi “Delivered by Agent X” dan mencatat log ke delivery.log.
+
+Fungsi terkait:
+`agent_thread() – Dibuat di file delivery_agent.c`
+
+### c. Pengiriman Bertipe Reguler
+Jika user menjalankan `./dispatcher -deliver [Nama]`, maka program mencari order reguler sesuai nama. Jika ditemukan dan statusnya masih "Pending", maka status diubah menjadi `"Delivered by Agent clarissazea"` dan log ditulis ke file `delivery.log.` Jika order tipe Express, maka user tidak diizinkan mengantar.
+
+Fungsi terkait:
+`Bagian dari main() dispatcher.c saat memproses -deliver`
+
+```bash
+} else if (strcmp(argv[1], "-deliver") == 0 && argc == 3) {
+    int found = 0;
+    for (int i = 0; i < *order_count; i++) {
+        if (strcmp(orders[i].name, argv[2]) == 0) {
+            if (strcmp(orders[i].type, "Reguler") == 0 && strcmp(orders[i].status, "Pending") == 0) {
+                snprintf(orders[i].status, STATUS_LEN, "Delivered by Agent clarissazea");
+
+                FILE *logfile = fopen("delivery.log", "a");
+                if (logfile) {
+                    time_t now = time(NULL);
+                    struct tm *t = localtime(&now);
+                    fprintf(logfile,
+                            "[%02d/%02d/%04d %02d:%02d:%02d] [AGENT clarissazea] Reguler package delivered to %s in %s\n",
+                            t->tm_mday, t->tm_mon + 1, t->tm_year + 1900,
+                            t->tm_hour, t->tm_min, t->tm_sec,
+                            orders[i].name, orders[i].address);
+                    fclose(logfile);
+                } else {
+                    perror("Failed to open delivery.log");
+                }
+
+                printf("Reguler package delivered to %s.\n", orders[i].name);
+            } else if (strcmp(orders[i].type, "Express") == 0) {
+                printf("Cannot manually deliver Express package.\n");
+            } else {
+                printf("Order already delivered or invalid.\n");
+            }
+            found = 1;
+            break;
+        }
+    }
+    if (!found) {
+        printf("Order not found for %s.\n", argv[2]);
+    }
+```
+
+### d. Mengecek Status Pesanan
+Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order sesuai nama. Jika ditemukan, status dicetak ke layar. Jika tidak, muncul pesan bahwa order tidak ditemukan.
+
+```bash
+} else if (strcmp(argv[1], "-status") == 0 && argc == 3) {
+    int found = 0;
+    for (int i = 0; i < *order_count; i++) {
+        if (strcmp(orders[i].name, argv[2]) == 0) {
+            printf("Status for %s: %s\n", orders[i].name, orders[i].status);
+            found = 1;
+            break;
+        }
+    }
+    if (!found) {
+        printf("Order not found for %s.\n", argv[2]);
+    }
+```
+
+### e. e. Melihat Daftar Semua Pesanan
+Dengan menjalankan `./dispatcher -list`, program akan mencetak semua nama pemesan (baik express maupun reguler) beserta status pengirimannya. Hal ini berguna untuk memonitoring seluruh orderan.
+
+```bash
+if (strcmp(argv[1], "-list") == 0) {
+    printf("Order List:\n");
+    for (int i = 0; i < *order_count; i++) {
+        printf("%s: %s\n", orders[i].name, orders[i].status);
+    }
+}
+```
+
+
 
 ## Dokumentasi
 
