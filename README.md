@@ -750,10 +750,6 @@ Dokumentasi:
 
 ![image](https://github.com/user-attachments/assets/1cf36750-ccec-4248-92dc-fd217ab3734d)
 
-Dokuemntasi hunter naik level:
-
-![image](https://github.com/user-attachments/assets/6592e931-3a57-422e-91e8-b79f4d95fe51)
-
 
 
 ### g. Fitur Menaklukkan Dungeon dan Naik Level (hunter.c)
@@ -823,6 +819,16 @@ printf("Dungeon cleared! Stats updated.\n");
 Dokumentasi:
 
 ![image](https://github.com/user-attachments/assets/338fba48-6422-4480-937f-27261451ae74)
+
+
+Dokumentasi saaat hunter naik level:
+
+![image](https://github.com/user-attachments/assets/8535ebc6-a75b-4ac3-8256-1b4bc8dfcac6)
+
+
+![image](https://github.com/user-attachments/assets/1d81e712-d4fa-4062-8976-6ae2b501c3d5)
+
+
 
 
 ### h. Fitur Battle antar Hunter (hunter.c)
