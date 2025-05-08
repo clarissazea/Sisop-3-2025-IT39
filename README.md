@@ -16,6 +16,8 @@ a. Mendownload file rahasia dari link
 ```bash
 wget -O secrets.zip "https://drive.google.com/uc?export=download&id=15mnXpYUimVP1F5Df7qd_Ahbjor3o1cVw" && unzip secrets.zip -d client/ && rm -r secrets.zip
 ```
+Fungsi tersebut digunakan agar image_server berjalan sebagai daemon di background.   
+
 b. Pada image_server.c, program yang dibuat harus berjalan secara daemon di background dan terhubung dengan image_client.c melalui socket RPC.
 ### Daemonize
 ```c 
@@ -57,6 +59,8 @@ int sockfd, new_sock;
 
     close(sockfd);
 ```
+Setelah menjadi daemon, program membuat socket TCP.  
+Kemudian, server akan terus accept() koneksi dari image_client, menjalankan perintah seperti DECRYPT dan DOWNLOAD via RPC.  
 
 c. Program image_client.c harus bisa terhubung dengan image_server.c dan bisa mengirimkan perintah untuk:   
 -Decrypt file      
@@ -231,6 +235,24 @@ void write_log(const char *source, const char *action, const char *info) {
     fprintf(log, "[%s][%s]: [%s] [%s]\n", source, timestr, action, info);
     fclose(log);
 }
+```
+Saat menerima perintah decrypt dari client
+```c
+write_log("Client", "DECRYPT", "Text data");
+
+// Setelah berhasil disimpan
+write_log("Server", "SAVE", filename);
+```
+Saat menerima perintah download
+```c
+write_log("Client", "DOWNLOAD", filename);
+
+// Jika file ditemukan dan dikirim:
+write_log("Server", "UPLOAD", filename);
+```
+Saat menerima perintah exit
+```c
+write_log("Client", "EXIT", "Client requested to exit");
 ```
 
 ## Dokumentasi
