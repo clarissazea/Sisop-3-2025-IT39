@@ -509,10 +509,203 @@ Dokumentasi:
 Dikerjakan oleh Muhammad Rafi' Adly (5027241082)   
 
 ## Cara Pengerjaan
+Soal 3 ini menggunakan RPC dengan konsep _client-server_. Ada 3 file utama, yaitu dungeon.c sebagai server, player.c sebagai client, dan shop.c untuk import function ke server. Server menggunakan socket lalu binding ke port 8080 untuk komunikasi jaringan dengan client. Kemudian, client menghubungkan ke alamat server dan port 8080. Sementara shop.c menjadi library dan diimport oleh server `dungeon.c`.
 
-## Dokumentasi
+###a. Entering the dungeon
+Server menggunakan multi-threading untuk berkomunikasi dengan banyak client.
+Membuat struct untuk thread
+```c
+struct ThreadArgs {
+    int sock;
+    int player_id;
+};
+```
+Di dalam `int main()` dideklarasikan array `pthread_t thread_id[MAX_CLIENTS];` untuk menyimpan id dari setiap thread yang dibuat (memiliki batas client hingga 10). Lalu di dalam while loop yang ada di `int main()`:
+```c
+struct ThreadArgs* args = malloc(sizeof(struct ThreadArgs));
+args->sock = new_socket;
+args->player_id = client_count;
+pthread_create(&thread_id[client_count], NULL, handle_client, args);
+```
+Setiap kali client baru terhubung:
+Server mengalokasikan memori, lalu server mengisi struct dengan socket client dan player_id. Kemudian server membuat thread baru dengan memanggil pthread_create().
+Thread baru akan menjalankan fungsi `handle_client`.
+```c
+void* handle_client(void* arg) {
+    struct ThreadArgs* args = (struct ThreadArgs*)arg;
+    int sock = args->sock;
+    int id = args->player_id;
+    free(arg);
+    
+    //...
+    
+    pthread_exit(NULL);
+}
+```
+
+###b. Sightseeing
+Untuk menampilkan interface utama, terdapat dalam fungsi `main()` yang ada di `player.c`.
+```c
+while (1) {
+        printf("\nMenu: \n");
+        printf("1. Player Stats\n");
+        printf("2. Shop\n");
+        printf("3. Inventory\n");
+        printf("4. Battle\n");
+        printf("5. Exit\n");
+        printf("Choose option: ");
+        scanf("%d", &pilihan);
+
+        sprintf(buffer, "%d", pilihan);
+        send(sock, buffer, strlen(buffer), 0);
+
+        memset(buffer, 0, sizeof(buffer));
+        valread = read(sock, buffer, 2048);
+        printf("%s\n", buffer);
+
+        if (pilihan == 2) {
+            int weapon_id;
+            printf("Enter weapon ID to buy (0 to cancel): ");
+            scanf("%d", &weapon_id);
+            sprintf(buffer, "%d", weapon_id);
+            send(sock, buffer, strlen(buffer), 0);
+
+            memset(buffer, 0, sizeof(buffer));
+            valread = read(sock, buffer, 2048);
+            printf("%s\n", buffer);
+        } else if (pilihan == 3) {
+            valread = read(sock, buffer, 1024);
+            buffer[valread] = '\0';
+            printf("%s", buffer);
+        
+            int idx;
+            scanf("%d", &idx);
+            sprintf(buffer, "%d", idx);
+            send(sock, buffer, strlen(buffer), 0);
+        
+            valread = read(sock, buffer, 1024);
+            buffer[valread] = '\0';
+            printf("%s\n", buffer);
+        }        
+
+        if (pilihan == 5) break;
+}
+```
+dan untuk mengakses pilihan menu menggunakan logika if else yang terdapat dalam fungsi `handle_client` di `dungeon.c`.
+```c
+int pilihan = atoi(buffer);
+        if (pilihan == 5) {
+            send(sock, "Goodbye!\n", strlen("Goodbye!\n"), 0);
+            break;
+        }
+
+        if (pilihan == 1) {
+            char stats[1024];
+            sprintf(stats, "Gold: %d\nWeapon: %s\nDamage: %d (%s)\nKills: %d\n",
+                players[id].gold, players[id].weapon, players[id].dmg,
+                strlen(players[id].passive) ? players[id].passive : "No passive",
+                players[id].kill_count);
+            send(sock, stats, strlen(stats), 0);
+        } else if (pilihan == 2) {
+            char shopinfo[1024] = "==== SHOP ====\n";
+            for (int i = 0; i < 5; i++) {
+                char line[256];
+                sprintf(line, "%d. %s (Price: %d, DMG: %d, Passive: %s)\n",
+                        weapons[i].id, weapons[i].name, weapons[i].price,
+                        weapons[i].dmg, weapons[i].passive[0] ? weapons[i].passive : "None");
+                strcat(shopinfo, line);
+            }
+            send(sock, shopinfo, strlen(shopinfo), 0);
+
+            memset(buffer, 0, sizeof(buffer));
+            valread = read(sock, buffer, 1024);
+            int weapon_pilihan = atoi(buffer);
+
+            const char* result = buy(id, weapon_pilihan);
+            send(sock, result, strlen(result), 0);
+        } else if (pilihan == 3) {
+            struct Player* p = &players[id];
+            char inv[1024];
+            strcpy(inv, "Inventory:\n");
+            strcat(inv, "0. Fists (DMG: 5, Passive: None)\n");
+
+            for (int i = 0; i < p->inventory_count; i++) {
+                char line[256];
+                sprintf(line, "%d. %s (DMG: %d, Passive: %s)\n", i + 1,
+                        p->inventory[i].name, p->inventory[i].dmg,
+                        strlen(p->inventory[i].passive) ? p->inventory[i].passive : "None");
+                strcat(inv, line);
+            }
+
+            strcat(inv, "Choose item to equip (number): ");
+            send(sock, inv, strlen(inv), 0);
+
+            int index;
+            read(sock, buffer, 1024);
+            sscanf(buffer, "%d", &index);
+            const char* msg = equip_weapon(id, index - 1);
+            send(sock, msg, strlen(msg), 0);
+        } else if (pilihan == 4) {
+            struct Player* p = &players[id];
+            char result[2048];
+            battle(0, result);
+            send(sock, result, strlen(result), 0);
+        }
+```
+![image](https://github.com/user-attachments/assets/79316e18-2f5d-42c4-90cf-ae45c1c43c89)
+
+###c. Status Check
+Untuk menampilkan status player, ada di dalam fungsi `handle_client` di `dungeon.c`
+```c
+if (pilihan == 1) {
+  char stats[1024];
+  sprintf(stats, "Gold: %d\nWeapon: %s\nDamage: %d (%s)\nKills: %d\n",
+    players[id].gold, players[id].weapon, players[id].dmg,
+    strlen(players[id].passive) ? players[id].passive : "No passive",
+    players[id].kill_count);
+  send(sock, stats, strlen(stats), 0);
+}
+```
+dan struct di `shop.c` untuk menyimpan data player
+```c
+struct Player {
+    int gold;
+    int dmg;
+    char weapon[255];
+    char passive[255];
+    struct weapon inventory[MAX_INVENTORY];
+    int inventory_count;
+    int kill_count;
+    int sock;
+};
+```
+![image](https://github.com/user-attachments/assets/23b24497-bb8f-4a18-93f0-5d1d2239ccde)
+
+###d. Weapon Shop
+Untuk mengakses shop terdapat di fungsi `handle_client` di `dungeon.c`
+```c
+else if (pilihan == 2) {
+            char shopinfo[1024] = "==== SHOP ====\n";
+            for (int i = 0; i < 5; i++) {
+                char line[256];
+                sprintf(line, "%d. %s (Price: %d, DMG: %d, Passive: %s)\n",
+                        weapons[i].id, weapons[i].name, weapons[i].price,
+                        weapons[i].dmg, weapons[i].passive[0] ? weapons[i].passive : "None");
+                strcat(shopinfo, line);
+            }
+            send(sock, shopinfo, strlen(shopinfo), 0);
+
+            memset(buffer, 0, sizeof(buffer));
+            valread = read(sock, buffer, 1024);
+            int weapon_pilihan = atoi(buffer);
+
+            const char* result = buy(id, weapon_pilihan);
+            send(sock, result, strlen(result), 0);
+        }
+```
 
 ## Revisi
+
 
 
 # SOAL 4
