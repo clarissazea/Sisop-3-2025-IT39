@@ -68,6 +68,12 @@ Penjelasan:
 - strtok(...): Memisahkan nama, alamat, dan tipe dari tiap baris.
 - strncpy(...): Menyalin informasi ke struktur Order.
 - strcpy(status, "Pending"): Status awal semua pesanan di-set sebagai 'Pending.'
+  
+Dokumentasi saat membaca `delivery_order.csv`
+![image](https://github.com/user-attachments/assets/fc49800a-7671-4ae0-a533-60d29ef637da)
+Dokumentasi semua status awal pesanan yang di-set sebagai pending.
+![image](https://github.com/user-attachments/assets/2e90f628-d257-4da6-81c0-915185a9c85b)
+
 
 ## Dokumentasi
 
