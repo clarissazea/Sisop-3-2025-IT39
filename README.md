@@ -35,6 +35,40 @@ Fungsi terkait:
 
 `read_csv_to_shared_memory() – Dibuat di file dispatcher.c`
 
+```bash
+void read_csv_to_shared_memory(Order *orders, int *order_count) {
+    FILE *file = fopen("delivery_order.csv", "r");
+    if (!file) {
+        perror("Failed to open delivery_order.csv");
+        exit(1);
+    }
+
+    char line[256];
+    *order_count = 0;
+
+    while (fgets(line, sizeof(line), file) && *order_count < MAX_ORDERS) {
+        char *token = strtok(line, ",");
+        if (token) strncpy(orders[*order_count].name, token, NAME_LEN);
+
+        token = strtok(NULL, ",");
+        if (token) strncpy(orders[*order_count].address, token, ADDR_LEN);
+
+        token = strtok(NULL, ",\n");
+        if (token) strncpy(orders[*order_count].type, token, 16);
+
+        strcpy(orders[*order_count].status, "Pending");
+        (*order_count)++;
+    }
+
+    fclose(file);
+}
+```
+Penjelasan:
+- fopen(...): Membuka file CSV.
+- strtok(...): Memisahkan nama, alamat, dan tipe dari tiap baris.
+- strncpy(...): Menyalin informasi ke struktur Order.
+- strcpy(status, "Pending"): Status awal semua pesanan di-set sebagai 'Pending.'
+
 ## Dokumentasi
 
 ## Revisi
