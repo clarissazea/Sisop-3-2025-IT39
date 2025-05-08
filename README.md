@@ -547,6 +547,17 @@ hunters = mmap(..., MAP_SHARED);
 - `hunters = mmap(..., MAP_SHARED)` : Attach ke address space
 - Error Handling: Jika SHM belum ada, keluar dengan pesan "Run system.c first!".
 
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/ae1a015b-fcab-4501-9a82-6c5887140f0c)
+
+![image](https://github.com/user-attachments/assets/fe4eeb64-b23c-48c6-8aab-74974fef1cd1)
+
+Error handling:
+![image](https://github.com/user-attachments/assets/b5f06faa-16cd-45e6-b319-f4a82967cec7)
+
+
+
 ### b. Registrasi dan Login Hunter
 Hunter bisa membuat akun (registrasi) dan masuk (login) ke sistem. Setiap akun memiliki stats awal dan disimpan dalam shared memory.
 
@@ -594,6 +605,12 @@ Cek banned status (apabila user di ban)
 if (hunters[idx].banned) printf("You are banned!");
 ```
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/154ea3e5-ae2b-4fc8-82a4-2dda64cb3af7)
+![image](https://github.com/user-attachments/assets/9d09593b-e389-438a-a7a6-28e1348cf7cd)
+
+
+
 ### c. Tampilkan Informasi Semua Hunter di system.c
 Admin dapat melihat semua hunter yang terdaftar dan statistik mereka.
 ```bash
@@ -618,6 +635,10 @@ Penjelasan:
 3. Status Banned:
 - Jika `hunters[i].banned == 1`, maka ditampilkan "Yes".
 - Jika `hunters[i].banned == 0`, maka ditampilkan "No".
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/d6564f68-b62f-4079-9e61-d259b2632247)
+
 
 ### d. Fitur Random Dungeon di system.c
 Sistem membuat dungeon dengan reward acak. Menggunakan `rand()` dan simpan di shared memory `Dungeon`.
@@ -659,6 +680,10 @@ Penjelasan:
 - Hadiah EXP (exp): Random antara 150 sampai 300 (rand() % 151 + 150).
 ```
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/6ca06914-c385-42e1-8c45-0db3e4e83ec0)
+
+
 ### e. Tampilkan Semua Dungeon (system.c)
 Admin bisa melihat seluruh dungeon aktif beserta status/levelnya. 
 ```bash
@@ -679,6 +704,10 @@ Penjelasan:
 3. Menampilkan informasi dungeon
 `<Nama> | LvMin:<Level> | ATK:<Attack> | HP:<Health> | DEF:<Defense> | EXP:<Experience>`
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/b4e740d0-a1f9-4bfc-8373-a904840742e4)
+
+
 ### f. Tampilkan Dungeon yang Sesuai Level Hunter (hunter.c)
 Hunter hanya bisa melihat dungeon sesuai level mereka. Filter dungeon berdasarkan `level_min <= hunter.level`
 
@@ -698,6 +727,10 @@ Penjelasan:
 1. `if (dungeons[i].used && dungeons[i].level_min <= h->level)` : Filter dungeon yang tersedia:
 2. Menampilkan info dungeon:
    `printf("%s | LvMin:%d | ATK:%d | HP:%d | DEF:%d | EXP:%d\n", ...);`
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/1cf36750-ccec-4248-92dc-fd217ab3734d)
+
 
 ### g. Fitur Menaklukkan Dungeon dan Naik Level (hunter.c)
 Hunter bisa memilih dungeon dan jika berhasil, dungeon dihapus dan hunter mendapat stat reward. Hunter naik level setiap meraih 500 exp, dan exp akan kembali default ketika naik level. 
@@ -763,6 +796,10 @@ dungeons[i].used = 0;
 printf("Dungeon cleared! Stats updated.\n");
 ```
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/338fba48-6422-4480-937f-27261451ae74)
+
+
 ### h. Fitur Battle antar Hunter (hunter.c)
 Hunter bisa menantang hunter lain dalam pertempuran. Pemenang ditentukan berdasarkan perbandingan statistik (membandingkan stats).
 Fungsi: `hunter_battle(int hunter_index)`
@@ -795,6 +832,9 @@ hunters[opp].atk += hunters[hunter_index].atk;
 hunters[hunter_index].used = 0; // Hapus diri sendiri
 exit(0); // Keluar dari program hunter
 ```
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/6cc68c3e-44ba-4106-ae12-029a2908c17b)
 
 
 ### i. Fitur Ban Hunter dan Unbanned Hunter (system.c)
@@ -834,6 +874,18 @@ void ban_menu() {
 }
 ```
 
+Dokumentasi (system.c) ---- Banned Hunter
+![image](https://github.com/user-attachments/assets/48462a40-7c28-4ff3-9fa1-9fdb03cd3251)
+Dokumentasi (hunter.c) ---- Banned Hunter
+![image](https://github.com/user-attachments/assets/6066e357-0172-4871-864d-76b70c96a863)
+
+Dokumentasi (system.c) ---- Unbanned Hunter
+![image](https://github.com/user-attachments/assets/0ba0979d-3899-480b-9260-a01b0632df6c)
+Dokumentasi (hunter.c) ---- Unbanned Hunter
+![image](https://github.com/user-attachments/assets/01b84e6f-ef74-47c0-9455-bf1d7672e842)
+
+
+
 ### j. Fitur Reset Stat Hunter (system.c)
 Admin (Sung Jin-Woo) dapat memberikan kesempatan kedua kepada hunter tertentu dengan mereset seluruh statistik mereka ke nilai awal seperti saat pertama kali registrasi.
 Fungsi: `reset_stats(const char* username)`
@@ -854,6 +906,12 @@ Penjelasan:
 1. Stats dikembalikan ke nilai default:
 Level=1, ATK=10, HP=100, DEF=5, EXP=0.
 2. Banned status tidak direset (tetap seperti sebelumnya).
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/09643769-6ac9-43ae-92ea-eea2db2be2d1)
+
+![image](https://github.com/user-attachments/assets/e55ba4b0-1665-42e0-8d7b-f3c8df8c2396)
+
 
 ### k. Fitur Notifikasi Dungeon Setiap 3 Detik
 ```bash
@@ -916,6 +974,8 @@ Penjelasan:
 2. `sleep(3)` untuk delay pergantian dungeon.
 3. `rand()` dan `time(NULL)` untuk pemilihan dungeon secara acak dan dinamis.
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/b1424a10-fc44-4eeb-9b1e-8338f2e3d3c5)
 
 
 
@@ -936,5 +996,8 @@ shm_unlink(DUNGEON_SHM); // Hapus dungeon shared memory
 Penjelasan:
 1. Semua data hunter dan dungeon hilang setelah sistem dimatikan.
 2. Jika system.c dijalankan ulang, SHM baru akan dibuat kosong.
+
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/4c69e7d7-1e1b-4c4e-9646-d89a897f22c5)
 
 
