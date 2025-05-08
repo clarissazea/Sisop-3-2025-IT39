@@ -547,13 +547,14 @@ hunters = mmap(..., MAP_SHARED);
 - `hunters = mmap(..., MAP_SHARED)` : Attach ke address space
 - Error Handling: Jika SHM belum ada, keluar dengan pesan "Run system.c first!".
 
-
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/ae1a015b-fcab-4501-9a82-6c5887140f0c)
 
 ![image](https://github.com/user-attachments/assets/fe4eeb64-b23c-48c6-8aab-74974fef1cd1)
 
 Error handling:
+
 ![image](https://github.com/user-attachments/assets/b5f06faa-16cd-45e6-b319-f4a82967cec7)
 
 
@@ -606,6 +607,7 @@ if (hunters[idx].banned) printf("You are banned!");
 ```
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/154ea3e5-ae2b-4fc8-82a4-2dda64cb3af7)
 ![image](https://github.com/user-attachments/assets/9d09593b-e389-438a-a7a6-28e1348cf7cd)
 
@@ -637,6 +639,7 @@ Penjelasan:
 - Jika `hunters[i].banned == 0`, maka ditampilkan "No".
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/d6564f68-b62f-4079-9e61-d259b2632247)
 
 
@@ -681,6 +684,7 @@ Penjelasan:
 ```
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/6ca06914-c385-42e1-8c45-0db3e4e83ec0)
 
 
@@ -705,6 +709,7 @@ Penjelasan:
 `<Nama> | LvMin:<Level> | ATK:<Attack> | HP:<Health> | DEF:<Defense> | EXP:<Experience>`
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/b4e740d0-a1f9-4bfc-8373-a904840742e4)
 
 
@@ -729,6 +734,7 @@ Penjelasan:
    `printf("%s | LvMin:%d | ATK:%d | HP:%d | DEF:%d | EXP:%d\n", ...);`
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/1cf36750-ccec-4248-92dc-fd217ab3734d)
 
 
@@ -797,6 +803,7 @@ printf("Dungeon cleared! Stats updated.\n");
 ```
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/338fba48-6422-4480-937f-27261451ae74)
 
 
@@ -834,6 +841,7 @@ exit(0); // Keluar dari program hunter
 ```
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/6cc68c3e-44ba-4106-ae12-029a2908c17b)
 
 
@@ -875,13 +883,19 @@ void ban_menu() {
 ```
 
 Dokumentasi (system.c) ---- Banned Hunter
+
 ![image](https://github.com/user-attachments/assets/48462a40-7c28-4ff3-9fa1-9fdb03cd3251)
+
 Dokumentasi (hunter.c) ---- Banned Hunter
+
 ![image](https://github.com/user-attachments/assets/6066e357-0172-4871-864d-76b70c96a863)
 
 Dokumentasi (system.c) ---- Unbanned Hunter
+
 ![image](https://github.com/user-attachments/assets/0ba0979d-3899-480b-9260-a01b0632df6c)
+
 Dokumentasi (hunter.c) ---- Unbanned Hunter
+
 ![image](https://github.com/user-attachments/assets/01b84e6f-ef74-47c0-9455-bf1d7672e842)
 
 
@@ -908,6 +922,7 @@ Level=1, ATK=10, HP=100, DEF=5, EXP=0.
 2. Banned status tidak direset (tetap seperti sebelumnya).
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/09643769-6ac9-43ae-92ea-eea2db2be2d1)
 
 ![image](https://github.com/user-attachments/assets/e55ba4b0-1665-42e0-8d7b-f3c8df8c2396)
@@ -975,6 +990,7 @@ Penjelasan:
 3. `rand()` dan `time(NULL)` untuk pemilihan dungeon secara acak dan dinamis.
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/b1424a10-fc44-4eeb-9b1e-8338f2e3d3c5)
 
 
@@ -998,6 +1014,7 @@ Penjelasan:
 2. Jika system.c dijalankan ulang, SHM baru akan dibuat kosong.
 
 Dokumentasi:
+
 ![image](https://github.com/user-attachments/assets/4c69e7d7-1e1b-4c4e-9646-d89a897f22c5)
 
 
