@@ -520,6 +520,19 @@ Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)
 
 ## Cara Pengerjaan
 
+Sistem manajemen hunter ini menggunakan shared memory untuk menghubungkan admin (system.c) dan hunter (hunter.c), memungkinkan registrasi, battle hunter, dungeon random, serta fitur ban/reset, dengan cleanup otomatis saat shutdown.
+
+### Argumen menjalankan program:
+Untuk program system
+```bash
+./system.c
+```
+
+Untuk program hunter
+```bash
+./hunter.c
+```
+
 ### a. Membuat 2 file, system.c dan hunter.c
 
 `system.c`: sebagai shared memory utama, hanya bisa dijalankan satu kali. Program ini membuat shared memory untuk data hunter dan dungeon.
@@ -553,7 +566,7 @@ Dokumentasi:
 
 ![image](https://github.com/user-attachments/assets/fe4eeb64-b23c-48c6-8aab-74974fef1cd1)
 
-Error handling:
+Error handling ketika hunter.c dijalankan dahulu (tanpa menjalankan system.c):
 
 ![image](https://github.com/user-attachments/assets/b5f06faa-16cd-45e6-b319-f4a82967cec7)
 
