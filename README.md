@@ -511,7 +511,7 @@ Dikerjakan oleh Muhammad Rafi' Adly (5027241082)
 ## Cara Pengerjaan
 Soal 3 ini menggunakan RPC dengan konsep _client-server_. Ada 3 file utama, yaitu dungeon.c sebagai server, player.c sebagai client, dan shop.c untuk import function ke server. Server menggunakan socket lalu binding ke port 8080 untuk komunikasi jaringan dengan client. Kemudian, client menghubungkan ke alamat server dan port 8080. Sementara shop.c menjadi library dan diimport oleh server `dungeon.c`.
 
-###a. Entering the dungeon
+##a. Entering the dungeon
 Server menggunakan multi-threading untuk berkomunikasi dengan banyak client.
 Membuat struct untuk thread
 ```c
@@ -543,7 +543,7 @@ void* handle_client(void* arg) {
 }
 ```
 
-###b. Sightseeing
+##b. Sightseeing
 Untuk menampilkan interface utama, terdapat dalam fungsi `main()` yang ada di `player.c`.
 ```c
 while (1) {
@@ -654,7 +654,7 @@ int pilihan = atoi(buffer);
 ```
 ![image](https://github.com/user-attachments/assets/79316e18-2f5d-42c4-90cf-ae45c1c43c89)
 
-###c. Status Check
+##c. Status Check
 Untuk menampilkan status player, ada di dalam fungsi `handle_client` di `dungeon.c`
 ```c
 if (pilihan == 1) {
@@ -681,7 +681,7 @@ struct Player {
 ```
 ![image](https://github.com/user-attachments/assets/23b24497-bb8f-4a18-93f0-5d1d2239ccde)
 
-###d. Weapon Shop
+##d. Weapon Shop
 Untuk mengakses shop terdapat di fungsi `handle_client` di `dungeon.c`
 ```c
 else if (pilihan == 2) {
