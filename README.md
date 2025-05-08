@@ -335,9 +335,13 @@ Fungsi terkait:
     }
 ```
 Penjelasan:
-- 
+- Saat pengguna menjalankan program dengan argumen `-deliver [nama]`, program akan mencari order berdasarkan nama. Jika ditemukan dan order bertipe Reguler serta statusnya masih Pending, maka status order diubah menjadi `"Delivered by Agent clarissazea"`
+- `if (strcmp(orders[i].type, "Reguler") == 0 && strcmp(orders[i].status, "Pending") == 0)` Memastikan bahwa order tersebut bertipe Reguler dan statusnya masih Pending.
+-  `snprintf(orders[i].status, STATUS_LEN, "Delivered by Agent clarissazea");` Mengubah status pesanan menjadi terkirim oleh agen bernama clarissazea.
+-  `fprintf(logfile, ...)` Menulis log pengiriman dengan format waktu, nama agen, nama pemesan, dan alamat.
+-  `printf("Reguler package delivered to %s.\n", orders[i].name);` Menampilkan pesan bahwa pengiriman berhasil.
 
-
+  
 ### d. Mengecek Status Pesanan
 Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order sesuai nama. Jika ditemukan, status dicetak ke layar. Jika tidak, muncul pesan bahwa order tidak ditemukan.
 
@@ -357,9 +361,12 @@ Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order se
 ```
 
 Penjelasan:
-- 
+- Saat pengguna menjalankan program dengan argumen `-status [nama]`, program akan menampilkan status orderan dari deliver
+- `if (strcmp(orders[i].name, argv[2]) == 0)` Mencocokkan nama pemesan dari argumen dengan nama yang ada di order.
+- `printf("Status for %s: %s\n", orders[i].name, orders[i].status);` Jika ditemukan, akan mencetak status pesanan milik nama tersebut.
+- `if (!found)` Jika tidak ditemukan, mencetak pesan bahwa order tidak ditemukan sesuai nama yang diberikan.
 
-### e. e. Melihat Daftar Semua Pesanan
+### e. Melihat Daftar Semua Pesanan
 Dengan menjalankan `./dispatcher -list`, program akan mencetak semua nama pemesan (baik express maupun reguler) beserta status pengirimannya. Hal ini berguna untuk memonitoring seluruh orderan.
 
 ```bash
@@ -371,11 +378,11 @@ if (strcmp(argv[1], "-list") == 0) {
 }
 ```
 
+Penjelasan:
+- Saat pengguna menjalankan program dengan argumen `-list`, program akan menampilkan seluruh pesanan baik express atau reguler.
+- `for (int i = 0; i < *order_count; i++)` Melakukan iterasi untuk setiap order yang ada dalam shared memory berdasarkan jumlah order yang ada (dari order_count).
+- `printf("%s: %s\n", orders[i].name, orders[i].status);` Mencetak nama pemesan dan status pesanan dari setiap order dalam daftar.
 
-
-## Dokumentasi
-
-## Revisi
 
 
 
