@@ -390,6 +390,9 @@ Penjelasan:
 - `snprintf(orders[i].status, STATUS_LEN, "Delivered by Agent %s", agent_name);` Jika cocok, status pesanan diubah menjadi “Delivered by Agent A/B/C” sesuai nama agen thread.
 - `sleep(1);` Menunggu 1 detik untuk menyimulasikan proses pengiriman barang (agar tidak terlalu cepat dalam loop).
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/d0c6d9fc-a932-40cc-9d00-2ce28a13a9dc)
+
 
 ### c. Pengiriman Bertipe Reguler
 Jika user menjalankan `./dispatcher -deliver [Nama]`, maka program mencari order reguler sesuai nama. Jika ditemukan dan statusnya masih "Pending", maka status diubah menjadi `"Delivered by Agent clarissazea"` dan log ditulis ke file `delivery.log.` Jika order tipe Express, maka user tidak diizinkan mengantar.
