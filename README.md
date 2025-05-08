@@ -818,8 +818,9 @@ void battle(int player_id, char* output) {
     }
 }
 ```
-![image](https://github.com/user-attachments/assets/6474f0f6-7e17-4cd0-9a47-2d35dc4208fb)
-![image](https://github.com/user-attachments/assets/6be79cad-6298-45f9-aec1-40c91fd5827e)
+![image](https://github.com/user-attachments/assets/6474f0f6-7e17-4cd0-9a47-2d35dc4208fb)  
+
+![image](https://github.com/user-attachments/assets/6be79cad-6298-45f9-aec1-40c91fd5827e)  
 HP musuh random, dan jika musuh terkalahkan player akan mendapat gold berjumlah 25% dari HP musuh. 
 
 # SOAL 4
