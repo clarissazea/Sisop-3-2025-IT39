@@ -274,7 +274,7 @@ Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)
 
 ## Cara Pengerjaan
 
-Sistem RushGo ini terdiri dari dua program, yaitu:
+Sistem Pengiriman RushGo ini terdiri dari dua program, yaitu:
 1. `delivery_agent.c`: Untuk agen pengantar otomatis pesanan Express.
 2. `dispatcher.c`: Untuk mengelola, memantau, dan memproses pesanan reguler (pesanan diantar manual)
 
