@@ -7,7 +7,54 @@
 # SOAL 1
 Dikerjakan oleh Ahmad Wildan Fawwaz (5027241001)   
 
-## Cara Pengerjaan
+Pada soal ini menggunakan 4 direktori folder dan 10 file. Dimana lebih lengkapnya:   
+folder: client, secrets, server, database.   
+file: image_client, input_1.txt, input_2.txt, input_3.txt, input_4.txt, input_5.txt, image_client.c, image_server.c, image_server, dan server.log.
+
+## Cara Pengerjaan   
+a. Mendownload file rahasia dari link   
+```bash
+wget -O secrets.zip "https://drive.google.com/uc?export=download&id=15mnXpYUimVP1F5Df7qd_Ahbjor3o1cVw" && unzip secrets.zip -d client/ && rm -r secrets.zip
+```
+b. Pada image_server.c, program yang dibuat harus berjalan secara daemon di background dan terhubung dengan image_client.c melalui socket RPC.
+```c (daemonize)
+void daemonize() {
+    pid_t pid = fork();
+    if (pid < 0) exit(EXIT_FAILURE);
+    if (pid > 0) exit(EXIT_SUCCESS); // Parent exit
+
+    setsid();                        // Buat session baru
+    chdir("/");                      // Ganti direktori kerja
+    close(STDIN_FILENO);            // Tutup standard IO
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+}
+```
+```c (socket setup RPC)
+int sockfd, new_sock;
+    struct sockaddr_in servaddr, cliaddr;
+    socklen_t addr_size;
+    char buffer[BUFSIZE];
+
+    mkdir("server/database", 0777); // Buat folder database jika belum ada
+
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(PORT); // PORT 8080
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+
+    bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+    listen(sockfd, 5); // Dengarkan hingga 5 koneksi masuk
+
+    while (1) {
+        addr_size = sizeof(cliaddr);
+        new_sock = accept(sockfd, (struct sockaddr*)&cliaddr, &addr_size);
+        ...
+        // Handle perintah dari client
+    }
+
+    close(sockfd);
+```
 
 ## Dokumentasi
 ![Image](https://github.com/user-attachments/assets/a826b17c-d199-44a0-a1c9-ec188fbfbc81)
