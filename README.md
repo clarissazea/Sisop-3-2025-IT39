@@ -520,6 +520,310 @@ Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)
 
 ## Cara Pengerjaan
 
+### a. Membuat 2 file, system.c dan hunter.c
+
+`system.c`: sebagai shared memory utama, hanya bisa dijalankan satu kali. Program ini membuat shared memory untuk data hunter dan dungeon.
+
+`hunter.c`: digunakan untuk registrasi dan interaksi hunter, dijalankan banyak kali oleh user berbeda. Program ini mengakses shared memory tersebut untuk melakukan operasi login, raid, dan lain-lain.
+
+Jadi, alurnya adalah `system.c membuat SHM` → `hunter.c attach` → `Keduanya bisa read/write data yang sama.`
+
+system.c
+```bash
+init_shared_memory() {
+    shm_open(HUNTER_SHM, O_CREAT|O_RDWR, 0666); 
+    ftruncate(fd, sizeof(Hunter)*MAX_HUNTERS);  
+    mmap(..., MAP_SHARED); 
+}
+```
+- `shm_open(HUNTER_SHM, O_CREAT|O_RDWR, 0666)`: Membuat shared memory dengan permission 0666 (read-write untuk semua).
+- ` mmap(..., MAP_SHARED);`: Menggunakan mmap dengan flag MAP_SHARED agar bisa diakses multi-proses.
+
+hunter.c
+```bash
+int fd = shm_open(HUNTER_SHM, O_RDWR, 0666); // Buka existing SHM
+hunters = mmap(..., MAP_SHARED); 
+```
+- `hunters = mmap(..., MAP_SHARED)` : Attach ke address space
+- Error Handling: Jika SHM belum ada, keluar dengan pesan "Run system.c first!".
+
+### b. Registrasi dan Login Hunter
+Hunter bisa membuat akun (registrasi) dan masuk (login) ke sistem. Setiap akun memiliki stats awal dan disimpan dalam shared memory.
+
+Struktur hunter:
+```bash
+```bash
+typedef struct {
+    char name[50];
+    int key;
+    int level, exp, atk, hp, def;
+    int banned;
+    int notification;
+    int used;
+} Hunter;
+```
+Fungsi Registrasi:
+Inisialisasi stats default
+```bash
+void register_hunter(Hunter *hunters) {
+    for (int i = 0; i < MAX_HUNTER; i++) {
+        if (!hunters[i].used) {
+            printf("Enter name: ");
+            scanf("%s", hunters[i].name);
+            hunters[i].key = rand() % 1000;
+            hunters[i].level = 1;
+            hunters[i].exp = 0;
+            hunters[i].atk = 10;
+            hunters[i].hp = 100;
+            hunters[i].def = 5;
+            hunters[i].banned = 0;
+            hunters[i].notification = 0;
+            hunters[i].used = 1;
+            printf("Registration successful! Key: %d\n", hunters[i].key);
+            break;
+        }
+    }
+}
+```
+Cek username:
+```bash
+if (get_hunter_index(name) != -1) { ... }
+```
+Cek banned status (apabila user di ban)
+```bash
+if (hunters[idx].banned) printf("You are banned!");
+```
+
+### c. Tampilkan Informasi Semua Hunter di system.c
+Admin dapat melihat semua hunter yang terdaftar dan statistik mereka.
+```bash
+void show_all_hunters(Hunter *hunters) {
+    for (int i = 0; i < MAX_HUNTER; i++) {
+        if (hunters[i].used) {
+            printf("%s | Lv:%d | Exp:%d | Atk:%d | HP:%d | Def:%d | Banned:%s\n",
+                hunters[i].name, hunters[i].level, hunters[i].exp,
+                hunters[i].atk, hunters[i].hp, hunters[i].def,
+                hunters[i].banned ? "Yes" : "No");
+        }
+    }
+}
+```
+Penjelasan:
+1. Loop melalui array hunters, Menggunakan perulangan `for` dari indeks `0 hingga MAX_HUNTER - 1`, lalu Memeriksa apakah slot hunter tersebut terisi `(hunters[i].used == 1)`
+2. Jika hunter terdaftar (used == 1), akan menampilkan:
+  
+```bash
+<Nama> | Lv:<Level> | Exp:<Exp> | Atk:<Attack> | HP:<HP> | Def:<Defense> | Banned:<Yes/No>
+```
+3. Status Banned:
+- Jika `hunters[i].banned == 1`, maka ditampilkan "Yes".
+- Jika `hunters[i].banned == 0`, maka ditampilkan "No".
+
+### d. Fitur Random Dungeon di system.c
+Sistem membuat dungeon dengan reward acak. Menggunakan `rand()` dan simpan di shared memory `Dungeon`.
+
+Struktur Dungeon
+```bash
+typedef struct {
+    char name[100];
+    int level_min;
+    int atk, hp, def, exp;
+    int used;
+} Dungeon;
+```
+Program pembuatan Dungeon
+```bash
+void create_dungeon(Dungeon *dungeons) {
+    for (int i = 0; i < MAX_DUNGEON; i++) {
+        if (!dungeons[i].used) {
+            sprintf(dungeons[i].name, "Dungeon-%d", rand() % 1000);
+            dungeons[i].level_min = rand() % 5 + 1;
+            dungeons[i].atk = rand() % 51 + 100;
+            dungeons[i].hp = rand() % 51 + 50;
+            dungeons[i].def = rand() % 26 + 25;
+            dungeons[i].exp = rand() % 151 + 150;
+            dungeons[i].used = 1;
+            break;
+        }
+    }
+}
+```
+Penjelasan:
+1. Loop melalui array dungeons: Menggunakan perulangan for dari indeks `0` hingga `MAX_DUNGEON - 1` dan mencari slot yang belum terpakai `(dungeons[i].used == 0)`.
+2. `(rand() % 5 + 1)` Jika menemukan slot kosong: nama dibuat secara acak, level Minimum random antara 1 sampai 5.
+3. Statistik Dungeon:
+```bash
+- Attack (atk): Random antara 100 sampai 150 (rand() % 51 + 100).
+- HP (hp): Random antara 50 sampai 100 (rand() % 51 + 50).
+- Defense (def): Random antara 25 sampai 50 (rand() % 26 + 25).
+- Hadiah EXP (exp): Random antara 150 sampai 300 (rand() % 151 + 150).
+```
+
+### e. Tampilkan Semua Dungeon (system.c)
+Admin bisa melihat seluruh dungeon aktif beserta status/levelnya. 
+```bash
+void show_all_dungeons(Dungeon *dungeons) {
+    for (int i = 0; i < MAX_DUNGEON; i++) {
+        if (dungeons[i].used) {
+            printf("%s | LvMin:%d | ATK:%d | HP:%d | DEF:%d | EXP:%d\n",
+                dungeons[i].name, dungeons[i].level_min, dungeons[i].atk,
+                dungeons[i].hp, dungeons[i].def, dungeons[i].exp);
+        }
+    }
+}
+```
+
+Penjelasan:
+1. `for (int i = 0; i < MAX_DUNGEON; i++)`: Mengiterasi melalui array dungeons dari indeks 0 hingga MAX_DUNGEON-1
+2. `if (dungeons[i].used)` : Memeriksa dungeon yang aktif
+3. Menampilkan informasi dungeon
+`<Nama> | LvMin:<Level> | ATK:<Attack> | HP:<Health> | DEF:<Defense> | EXP:<Experience>`
+
+### f. Tampilkan Dungeon yang Sesuai Level Hunter (hunter.c)
+Hunter hanya bisa melihat dungeon sesuai level mereka. Filter dungeon berdasarkan `level_min <= hunter.level`
+
+```bash
+void show_available_dungeons(Dungeon *dungeons, Hunter *h) {
+    for (int i = 0; i < MAX_DUNGEON; i++) {
+        if (dungeons[i].used && dungeons[i].level_min <= h->level) {
+            printf("%s | LvMin:%d | ATK:%d | HP:%d | DEF:%d | EXP:%d\n",
+                dungeons[i].name, dungeons[i].level_min, dungeons[i].atk,
+                dungeons[i].hp, dungeons[i].def, dungeons[i].exp);
+        }
+    }
+}
+```
+
+Penjelasan: 
+1. `if (dungeons[i].used && dungeons[i].level_min <= h->level)` : Filter dungeon yang tersedia:
+2. Menampilkan info dungeon:
+   `printf("%s | LvMin:%d | ATK:%d | HP:%d | DEF:%d | EXP:%d\n", ...);`
+
+### g. Fitur Menaklukkan Dungeon dan Naik Level (hunter.c)
+Hunter bisa memilih dungeon dan jika berhasil, dungeon dihapus dan hunter mendapat stat reward. Hunter naik level setiap meraih 500 exp, dan exp akan kembali default ketika naik level. 
+
+```bash
+void raid_dungeon(Dungeon *dungeons, Hunter *h) {
+    char dungeon_name[50];
+    printf("Enter dungeon name to raid: ");
+    scanf("%s", dungeon_name);
+
+    for (int i = 0; i < MAX_DUNGEON; i++) {
+        if (dungeons[i].used && strcmp(dungeons[i].name, dungeon_name) == 0) {
+            if (h->banned) {
+                printf("You are banned from raiding.\n");
+                return;
+            }
+            if (h->level < dungeons[i].level_min) {
+                printf("Level too low.\n");
+                return;
+            }
+            h->atk += dungeons[i].atk;
+            h->hp += dungeons[i].hp;
+            h->def += dungeons[i].def;
+            h->exp += dungeons[i].exp;
+            if (h->exp >= 500) {
+                h->level++;
+                h->exp = 0;
+            }
+            dungeons[i].used = 0;
+            printf("Dungeon cleared! Stats updated.\n");
+            break;
+        }
+    }
+}
+```
+Penjelasan:
+1. Input nama Dungeon:
+```bash
+char dungeon_name[50];
+printf("Enter dungeon name to raid: ");
+scanf("%s", dungeon_name);
+```
+2. Mencari dungeon dengan nama yang sesuai dan masih aktif (used == 1)
+```bash
+for (int i = 0; i < MAX_DUNGEON; i++) {
+    if (dungeons[i].used && strcmp(dungeons[i].name, dungeon_name) == 0) {
+```
+3. Menambahkan statistik dungeon ke hunter (ATK, HP, DEF) dan menambahkan EXP dari dungeon ke hunter
+```bash
+h->atk += dungeons[i].atk;
+h->hp += dungeons[i].hp;
+h->def += dungeons[i].def;
+h->exp += dungeons[i].exp;
+```
+4. Jika EXP hunter mencapai 500, level naik dan EXP direset ke 0 lalu menampilkan pesan sukses
+```bash
+if (h->exp >= 500) {
+    h->level++;
+    h->exp = 0;
+}
+
+dungeons[i].used = 0;
+printf("Dungeon cleared! Stats updated.\n");
+```
+
+### h. Fitur Battle antar Hunter (hunter.c)
+Hunter bisa menantang hunter lain dalam pertempuran. Pemenang ditentukan berdasarkan perbandingan statistik (membandingkan stats).
+```bash
+void battle(Hunter *hunters, Hunter *self) {
+    char opponent_name[50];
+    printf("Enter name of opponent: ");
+    scanf("%s", opponent_name);
+    
+    for (int i = 0; i < MAX_HUNTER; i++) {
+        if (hunters[i].used && strcmp(hunters[i].name, opponent_name) == 0) {
+            Hunter *op = &hunters[i];
+            int damage_to_op = self->atk - op->def;
+            int damage_to_self = op->atk - self->def;
+            if (damage_to_op > damage_to_self) {
+                printf("You win the battle!\n");
+                self->exp += 100;
+            } else if (damage_to_self > damage_to_op) {
+                printf("You lost the battle.\n");
+            } else {
+                printf("It's a draw!\n");
+            }
+            return;
+        }
+    }
+    printf("Opponent not found.\n");
+}
+
+```
+
+### i. Fitur Ban Hunter dan Unbanned Hunter (system.c)
+Admin bisa membatasi akses hunter untuk melakukan raid dungeon dengan memberi status banned.
+
+```
+void ban_hunter(Hunter *hunters) {
+    char target[50];
+    printf("Enter name of hunter to ban: ");
+    scanf("%s", target);
+    
+    for (int i = 0; i < MAX_HUNTER; i++) {
+        if (hunters[i].used && strcmp(hunters[i].name, target) == 0) {
+            hunters[i].banned = 1;
+            printf("Hunter %s has been banned.\n", target);
+            return;
+        }
+    }
+    printf("Hunter not found.\n");
+}
+```
+
+### j. 
+
+### k. 
+
+### l. Hapus data shared memory
+```bash
+shmdt(hunters);
+shmdt(dungeons);
+```
+
+
+
 ## Dokumentasi
 
 ## Revisi
