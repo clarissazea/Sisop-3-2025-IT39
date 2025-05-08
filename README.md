@@ -750,6 +750,11 @@ Dokumentasi:
 
 ![image](https://github.com/user-attachments/assets/1cf36750-ccec-4248-92dc-fd217ab3734d)
 
+Dokuemntasi hunter naik level:
+
+![image](https://github.com/user-attachments/assets/6592e931-3a57-422e-91e8-b79f4d95fe51)
+
+
 
 ### g. Fitur Menaklukkan Dungeon dan Naik Level (hunter.c)
 Hunter bisa memilih dungeon dan jika berhasil, dungeon dihapus dan hunter mendapat stat reward. Hunter naik level setiap meraih 500 exp, dan exp akan kembali default ketika naik level. 
