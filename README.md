@@ -441,9 +441,9 @@ Penjelasan:
 -  `printf("Reguler package delivered to %s.\n", orders[i].name);` Menampilkan pesan bahwa pengiriman berhasil.
 
    Dokumentasi:
-- Jika orderan reguler
+   Jika orderan reguler
   ![image](https://github.com/user-attachments/assets/dfc622e2-8033-4fc5-8c62-a2ee89812faf)
-- Jika orderan express namun diantar manual (dengan dispatcher)
+   Jika orderan express namun diantar manual (dengan dispatcher)
   ![image](https://github.com/user-attachments/assets/a618c169-0d71-46df-9a7a-21f759bd3a01)
 
 
@@ -473,6 +473,10 @@ Penjelasan:
 - `printf("Status for %s: %s\n", orders[i].name, orders[i].status);` Jika ditemukan, akan mencetak status pesanan milik nama tersebut.
 - `if (!found)` Jika tidak ditemukan, mencetak pesan bahwa order tidak ditemukan sesuai nama yang diberikan.
 
+  Dokumentasi:
+  ![image](https://github.com/user-attachments/assets/fd035ac1-8f2f-4d80-9ff3-2322be3c99e8)
+
+
 ### e. Melihat Daftar Semua Pesanan
 Dengan menjalankan `./dispatcher -list`, program akan mencetak semua nama pemesan (baik express maupun reguler) beserta status pengirimannya. Hal ini berguna untuk memonitoring seluruh orderan.
 
@@ -490,6 +494,9 @@ Penjelasan:
 - `for (int i = 0; i < *order_count; i++)` Melakukan iterasi untuk setiap order yang ada dalam shared memory berdasarkan jumlah order yang ada (dari order_count).
 - `printf("%s: %s\n", orders[i].name, orders[i].status);` Mencetak nama pemesan dan status pesanan dari setiap order dalam daftar.
 
+Dokumentasi:
+![image](https://github.com/user-attachments/assets/d6a0fcd2-5d92-4b41-8978-6036174075d3)
+![image](https://github.com/user-attachments/assets/b6b7b99f-3260-426f-af3f-8260fc2abcb1)
 
 
 
