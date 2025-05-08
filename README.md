@@ -440,6 +440,14 @@ Penjelasan:
 -  `fprintf(logfile, ...)` Menulis log pengiriman dengan format waktu, nama agen, nama pemesan, dan alamat.
 -  `printf("Reguler package delivered to %s.\n", orders[i].name);` Menampilkan pesan bahwa pengiriman berhasil.
 
+   Dokumentasi:
+- Jika orderan reguler
+  ![image](https://github.com/user-attachments/assets/dfc622e2-8033-4fc5-8c62-a2ee89812faf)
+- Jika orderan express namun diantar manual (dengan dispatcher)
+  ![image](https://github.com/user-attachments/assets/a618c169-0d71-46df-9a7a-21f759bd3a01)
+
+
+
   
 ### d. Mengecek Status Pesanan
 Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order sesuai nama. Jika ditemukan, status dicetak ke layar. Jika tidak, muncul pesan bahwa order tidak ditemukan.
