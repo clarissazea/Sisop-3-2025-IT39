@@ -191,9 +191,11 @@ Untuk delivery agent
 `./delivery_agent`
 
 Untuk dispatcher
-`./dispatcher -list
+```bash
+./dispatcher -list
 ./dispatcher -status [Nama]
-./dispatcher -deliver [Nama]`
+./dispatcher -deliver [Nama]
+```
 
 
 
