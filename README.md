@@ -266,7 +266,9 @@ write_log("Client", "EXIT", "Client requested to exit");
 
 ![Image](https://github.com/user-attachments/assets/9cc71108-c872-4eb3-93a2-ea556e308973)
 ## Revisi
-
+-Penambahan socket RPC 
+-Penambahan error handling 
+-Perbaikan kode pada image_client.c & image_server.c
 
 
 # SOAL 2
