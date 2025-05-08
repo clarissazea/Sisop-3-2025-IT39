@@ -28,6 +28,13 @@ Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)
 
 ## Cara Pengerjaan
 
+### a. Mengunduh File Order dan Menyimpannya ke Shared Memory
+Fungsi ini bertanggung jawab membaca file CSV delivery_order.csv, yang berisi daftar pesanan. Setiap baris mencakup informasi nama pelanggan, alamat, dan tipe pesanan. Data tersebut kemudian dimasukkan ke shared memory, dan setiap status pesanan di-set ke “Pending” secara default.
+
+Fungsi terkait:
+
+`read_csv_to_shared_memory() – Dibuat di file dispatcher.c`
+
 ## Dokumentasi
 
 ## Revisi
