@@ -509,7 +509,7 @@ Dokumentasi:
 Dikerjakan oleh Muhammad Rafi' Adly (5027241082)   
 
 ## Cara Pengerjaan
-Soal 3 ini menggunakan RPC dengan konsep _client-server_. Ada 3 file utama, yaitu dungeon.c sebagai server, player.c sebagai client, dan shop.c untuk import function ke server. Server menggunakan socket lalu binding ke port 8080 untuk komunikasi jaringan dengan client. Kemudian, client menghubungkan ke alamat server dan port 8080. Sementara shop.c menjadi library dan diimport oleh server `dungeon.c`.
+Soal 3 ini menggunakan RPC dengan konsep _client-server_. Ada 3 file utama, yaitu `dungeon.c` sebagai server, `player.c` sebagai client, dan `shop.c` untuk import function ke server. Server menggunakan socket lalu binding ke port 8080 untuk komunikasi jaringan dengan client. Kemudian, client menghubungkan ke alamat server dan port 8080. Sementara `shop.c` menjadi library dan diimport oleh server `dungeon.c`.
 
 ### a. Entering the dungeon
 Server menggunakan multi-threading untuk berkomunikasi dengan banyak client.
@@ -739,10 +739,88 @@ else {
   send(sock, "Invalid Option. Choose Number 1-5!\n", 26, 0);
 }
 ```
+![image](https://github.com/user-attachments/assets/5e33f2af-5c4f-4ff6-9fdb-42e3e34cc767)
 
 ## Revisi
+### Inventory
+### Battle
+Untuk mengakses battle mode ada di fungsi `handle_client`  
+```c
+else if (pilihan == 4) {
+  struct Player* p = &players[id];
+  char result[2048];
+  battle(0, result);
+  send(sock, result, strlen(result), 0);
+}
+```
+yang akan memanggil fungsi `battle`.
+```c
+void battle(int player_id, char* output) {
+    struct Player* p = &players[player_id];
+    int enemy_hp = (p->kill_count == 0) ? (rand() % 151 + 50) : (rand() % 901 + 100);  // HP acak
+    int enemy_max_hp = enemy_hp;
+    int hit = p->dmg;
 
+    if (strcmp(p->passive, "Damage x2") == 0) hit *= 2;
+    else if (strcmp(p->passive, "Damage x20%%") == 0) hit *= 0.2;
+    else if (strcmp(p->passive, "Instantly Kill") == 0) {
+        sprintf(output, "You used %s. Enemy instantly defeated!\n", p->weapon);
+        p->kill_count++;
+        int reward_gold = enemy_hp / 4; 
+        p->gold += reward_gold; 
+        sprintf(output + strlen(output), "You earned %d gold!\n", reward_gold);
+        return;
+    }
 
+    char battle_status[2048];
+    while (enemy_hp > 0) {
+        memset(battle_status, 0, sizeof(battle_status));
+
+        int bar_length = 50;
+        int health_bar = (int)((float)enemy_hp / enemy_max_hp * bar_length);
+
+        sprintf(battle_status, "\n--- Battle Mode ---\n");
+        sprintf(battle_status + strlen(battle_status), "Enemy HP: %d/%d\n", enemy_hp, enemy_max_hp);
+        sprintf(battle_status + strlen(battle_status), "Health Bar: [");
+        for (int i = 0; i < health_bar; i++) {
+            strcat(battle_status, "#");
+        }
+        for (int i = health_bar; i < bar_length; i++) {
+            strcat(battle_status, "-");
+        }
+        strcat(battle_status, "]\n");
+
+        strcat(battle_status, "\nChoose action: \n1. Attack\n2. Exit\n");
+        send(p->sock, battle_status, strlen(battle_status), 0);
+
+        char buffer[1024];
+        int valread = read(p->sock, buffer, sizeof(buffer));
+        buffer[valread] = '\0';
+        
+        if (atoi(buffer) == 2) {
+            send(p->sock, "Exiting Battle Mode...\n", strlen("Exiting Battle Mode...\n"), 0);
+            return;
+        }
+
+        enemy_hp -= hit;
+        sprintf(battle_status, "You dealt %d damage!\n", hit);
+        send(p->sock, battle_status, strlen(battle_status), 0);
+
+        if (enemy_hp <= 0) {
+            p->kill_count++;
+            int reward_gold = enemy_max_hp / 4; 
+            p->gold += reward_gold;
+
+            sprintf(battle_status, "You defeated the enemy!\nYou earned %d gold!\n", reward_gold);
+            send(p->sock, battle_status, strlen(battle_status), 0);
+            break;
+        }
+    }
+}
+```
+![image](https://github.com/user-attachments/assets/6474f0f6-7e17-4cd0-9a47-2d35dc4208fb)
+![image](https://github.com/user-attachments/assets/6be79cad-6298-45f9-aec1-40c91fd5827e)
+HP musuh random, dan jika musuh terkalahkan player akan mendapat gold berjumlah 25% dari HP musuh. 
 
 # SOAL 4
 Dikerjakan oleh Clarissa Aydin Rahmazea (5027241014)   
