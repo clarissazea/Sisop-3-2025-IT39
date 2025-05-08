@@ -285,6 +285,11 @@ void *agent_thread(void *arg) {
     return NULL;
 }
 ```
+Penjelasan:
+- Mengecek semua order
+- `if (strcmp(orders[i].type, "Express") == 0 && strcmp(orders[i].status, "Pending") == 0)` Mengecek apakah pesanan bertipe Express dan statusnya masih Pending (belum dikirim).
+- `snprintf(orders[i].status, STATUS_LEN, "Delivered by Agent %s", agent_name);` Jika cocok, status pesanan diubah menjadi “Delivered by Agent A/B/C” sesuai nama agen thread.
+- `sleep(1);` Menunggu 1 detik untuk menyimulasikan proses pengiriman barang (agar tidak terlalu cepat dalam loop).
 
 
 ### c. Pengiriman Bertipe Reguler
@@ -329,6 +334,9 @@ Fungsi terkait:
         printf("Order not found for %s.\n", argv[2]);
     }
 ```
+Penjelasan:
+- 
+
 
 ### d. Mengecek Status Pesanan
 Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order sesuai nama. Jika ditemukan, status dicetak ke layar. Jika tidak, muncul pesan bahwa order tidak ditemukan.
@@ -347,6 +355,9 @@ Dengan perintah `./dispatcher -status [Nama]`, user bisa melihat status order se
         printf("Order not found for %s.\n", argv[2]);
     }
 ```
+
+Penjelasan:
+- 
 
 ### e. e. Melihat Daftar Semua Pesanan
 Dengan menjalankan `./dispatcher -list`, program akan mencetak semua nama pemesan (baik express maupun reguler) beserta status pengirimannya. Hal ini berguna untuk memonitoring seluruh orderan.
