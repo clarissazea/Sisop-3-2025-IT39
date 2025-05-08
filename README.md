@@ -765,77 +765,95 @@ printf("Dungeon cleared! Stats updated.\n");
 
 ### h. Fitur Battle antar Hunter (hunter.c)
 Hunter bisa menantang hunter lain dalam pertempuran. Pemenang ditentukan berdasarkan perbandingan statistik (membandingkan stats).
+Fungsi: `hunter_battle(int hunter_index)`
+
+1. Hanya tampilkan hunter yang tidak banned dan bukan diri sendiri:
 ```bash
-void battle(Hunter *hunters, Hunter *self) {
-    char opponent_name[50];
-    printf("Enter name of opponent: ");
-    scanf("%s", opponent_name);
-    
-    for (int i = 0; i < MAX_HUNTER; i++) {
-        if (hunters[i].used && strcmp(hunters[i].name, opponent_name) == 0) {
-            Hunter *op = &hunters[i];
-            int damage_to_op = self->atk - op->def;
-            int damage_to_self = op->atk - self->def;
-            if (damage_to_op > damage_to_self) {
-                printf("You win the battle!\n");
-                self->exp += 100;
-            } else if (damage_to_self > damage_to_op) {
-                printf("You lost the battle.\n");
-            } else {
-                printf("It's a draw!\n");
-            }
-            return;
-        }
+for (int i = 0; i < MAX_HUNTERS; ++i) {
+    if (hunters[i].used && i != hunter_index && !hunters[i].banned) {
+        printf("%d. %s (Level %d)\n", count, hunters[i].username, hunters[i].level);
+        opponents[count - 1] = i; // Simpan index lawan
     }
-    printf("Opponent not found.\n");
 }
 
 ```
+2. Menghitung kekuatan. Total stats (ATK + HP + DEF) menentukan kekuatan:
+```bash
+int my_power = hunters[hunter_index].atk + hunters[hunter_index].hp + hunters[hunter_index].def;
+int opp_power = hunters[opp].atk + hunters[opp].hp + hunters[opp].def;
+```
+3. Hasil battle jika menang:
+```bash
+hunters[hunter_index].atk += hunters[opp].atk; // Ambil ATK lawan
+hunters[hunter_index].hp += hunters[opp].hp;   // Ambil HP lawan
+hunters[opp].used = 0; // Hapus lawan dari sistem
+```
+
+4. Hasil battle jika kalah:
+```bash
+hunters[opp].atk += hunters[hunter_index].atk;
+hunters[hunter_index].used = 0; // Hapus diri sendiri
+exit(0); // Keluar dari program hunter
+```
+
 
 ### i. Fitur Ban Hunter dan Unbanned Hunter (system.c)
 Admin bisa membatasi akses hunter untuk melakukan raid dungeon dengan memberi status banned.
+Fungsi: `toggle_ban(const char* username, int ban)`
+1. Mencari hunter
+```bash
+for (int i = 0; i < MAX_HUNTERS; i++) {
+    if (hunters[i].used && strcmp(hunters[i].username, username) == 0) {
+        hunters[i].banned = ban; // Set flag banned
+    }
+}
 
 ```
-void ban_hunter(Hunter *hunters) {
-    char target[50];
-    printf("Enter name of hunter to ban: ");
-    scanf("%s", target);
-    
-    for (int i = 0; i < MAX_HUNTER; i++) {
-        if (hunters[i].used && strcmp(hunters[i].name, target) == 0) {
-            hunters[i].banned = 1;
-            printf("Hunter %s has been banned.\n", target);
-            return;
-        }
-    }
-    printf("Hunter not found.\n");
+2. Hunter yang banned tidak bisa login:
+```bash
+// Di hunter.c (login):
+if (hunters[idx].banned) {
+    printf("You are banned!");
+    return;
+}
+```
+3. Hunter yang banned tidak bisa raid/battle:
+```bash
+// Di dungeon_raid() dan hunter_battle():
+if (hunters[hunter_index].banned) {
+    printf("You are banned!");
+    return;
+}
+```
+4. Menu admin:
+```bash
+void ban_menu() {
+    printf("1. Ban hunter\n2. Unban hunter\n");
+    scanf("%d", &choice);
+    toggle_ban(username, choice == 1 ? 1 : 0);
 }
 ```
 
 ### j. Fitur Reset Stat Hunter (system.c)
 Admin (Sung Jin-Woo) dapat memberikan kesempatan kedua kepada hunter tertentu dengan mereset seluruh statistik mereka ke nilai awal seperti saat pertama kali registrasi.
-```bash
-void reset_hunter_stats(Hunter *hunters) {
-    char target[50];
-    printf("Enter name of hunter to reset: ");
-    scanf("%s", target);
+Fungsi: `reset_stats(const char* username)`
 
-    for (int i = 0; i < MAX_HUNTER; i++) {
-        if (hunters[i].used && strcmp(hunters[i].name, target) == 0) {
-            hunters[i].level = 1;
-            hunters[i].exp = 0;
-            hunters[i].atk = 10;
-            hunters[i].hp = 100;
-            hunters[i].def = 5;
-            hunters[i].banned = 0;
-            printf("Hunter %s's stats have been reset to default.\n", target);
-            return;
-        }
+```bash
+for (int i = 0; i < MAX_HUNTERS; i++) {
+    if (hunters[i].used && strcmp(hunters[i].username, username) == 0) {
+        hunters[i].level = 1;
+        hunters[i].atk = 10;
+        hunters[i].hp = 100;
+        hunters[i].def = 5;
+        hunters[i].exp = 0;
+        // Banned status tetap tidak berubah
     }
-    printf("Hunter not found.\n");
 }
 ```
-
+Penjelasan:
+1. Stats dikembalikan ke nilai default:
+Level=1, ATK=10, HP=100, DEF=5, EXP=0.
+2. Banned status tidak direset (tetap seperti sebelumnya).
 
 ### k. Fitur Notifikasi Dungeon Setiap 3 Detik
 ```bash
@@ -902,13 +920,21 @@ Penjelasan:
 
 
 ### l. Hapus data shared memory
+Fungsi: `cleanup_shared_memory()`
+
+1. Melepaskan mapping dari virtual memory.
 ```bash
-shmdt(hunters);
-shmdt(dungeons);
+munmap(hunters, sizeof(Hunter) * MAX_HUNTERS);
+munmap(dungeons, sizeof(Dungeon) * MAX_DUNGEONS);
+```
+2. Hapus Shared Memory
+```bash
+shm_unlink(HUNTER_SHM); // Hapus hunter shared memory
+shm_unlink(DUNGEON_SHM); // Hapus dungeon shared memory
 ```
 
+Penjelasan:
+1. Semua data hunter dan dungeon hilang setelah sistem dimatikan.
+2. Jika system.c dijalankan ulang, SHM baru akan dibuat kosong.
 
 
-## Dokumentasi
-
-## Revisi
